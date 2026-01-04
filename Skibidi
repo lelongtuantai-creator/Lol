@@ -1,0 +1,93 @@
+-- LOCAL SCRIPT
+
+local player = game.Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local humanoid = char:WaitForChild("Humanoid")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+-- GUI
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+
+local toggleBtn = Instance.new("ImageButton")
+toggleBtn.Size = UDim2.new(0,80,0,80)
+toggleBtn.Position = UDim2.new(0,20,0.5,-40)
+toggleBtn.Image = "rbxassetid://1000032575" -- đổi ID ảnh của bạn nếu cần
+toggleBtn.BackgroundTransparency = 1
+toggleBtn.Parent = gui
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0,200,0,220)
+frame.Position = UDim2.new(0,110,0.5,-110)
+frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+frame.Visible = false
+frame.Parent = gui
+
+-- Toggle mở / đóng bong bóng
+toggleBtn.MouseButton1Click:Connect(function()
+	frame.Visible = not frame.Visible
+end)
+
+-- Hàm tạo nút
+local function createBtn(text, y)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1,-20,0,40)
+	btn.Position = UDim2.new(0,10,0,y)
+	btn.Text = text
+	btn.BackgroundColor3 = Color3.fromRGB(120,0,0)
+	btn.TextColor3 = Color3.new(1,1,1)
+	btn.Parent = frame
+	return btn
+end
+
+-- Buttons
+local jumpBtn = createBtn("NHẢY CAO", 10)
+local flyBtn = createBtn("BAY", 60)
+local invisBtn = createBtn("TÀNG HÌNH", 110)
+local speedBtn = createBtn("CHẠY NHANH", 160)
+
+-- NHẢY CAO
+jumpBtn.MouseButton1Click:Connect(function()
+	humanoid.JumpPower = 150
+end)
+
+-- CHẠY NHANH
+speedBtn.MouseButton1Click:Connect(function()
+	humanoid.WalkSpeed = 50
+end)
+
+-- TÀNG HÌNH
+local invisible = false
+invisBtn.MouseButton1Click:Connect(function()
+	invisible = not invisible
+	for _,v in pairs(char:GetDescendants()) do
+		if v:IsA("BasePart") then
+			v.Transparency = invisible and 1 or 0
+		end
+	end
+end)
+
+-- BAY
+local flying = false
+local bv, bg
+
+flyBtn.MouseButton1Click:Connect(function()
+	flying = not flying
+
+	if flying then
+		bv = Instance.new("BodyVelocity", char.HumanoidRootPart)
+		bg = Instance.new("BodyGyro", char.HumanoidRootPart)
+		bv.MaxForce = Vector3.new(1e5,1e5,1e5)
+		bg.MaxTorque = Vector3.new(1e5,1e5,1e5)
+
+		RunService.RenderStepped:Connect(function()
+			if flying then
+				bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * 60
+				bg.CFrame = workspace.CurrentCamera.CFrame
+			end
+		end)
+	else
+		if bv then bv:Destroy() end
+		if bg then bg:Destroy() end
+	end
+end)
